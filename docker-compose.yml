@@ -1,0 +1,100 @@
+version: "3.9"
+
+services:
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    tty: true
+    init: true
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    networks:
+      - rabbitmq_network
+
+  cpp_publisher:
+    build: ./cpp_publisher
+    tty: true
+    init: true
+    depends_on:
+      - rabbitmq
+    networks:
+      - rabbitmq_network
+    volumes:
+      - ./cpp_publisher:/usr/src/cpp_publisher
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+
+  cpp_subscriber:
+    build: ./cpp_subscriber
+    tty: true
+    init: true
+    depends_on:
+      - rabbitmq
+    networks:
+      - rabbitmq_network
+    volumes:
+      - ./cpp_subscriber:/usr/src/cpp_subscriber
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+
+  python_subscriber:
+    build: ./python_subscriber
+    tty: true
+    init: true
+    depends_on:
+      - rabbitmq
+    networks:
+      - rabbitmq_network
+    volumes:
+      - ./python_subscriber:/usr/src/python_subscriber
+
+  python_subscriber_pilot:
+    build: ./python_subscriber_pilot
+    tty: true
+    init: true
+    depends_on:
+      - rabbitmq
+    networks:
+      - rabbitmq_network
+    volumes:
+      - ./python_subscriber_pilot:/usr/src/python_subscriber_pilot
+
+  python_publisher:
+    build: ./python_publisher
+    tty: true
+    init: true
+    depends_on:
+      - rabbitmq
+    networks:
+      - rabbitmq_network
+    volumes:
+      - ./python_publisher:/usr/src/python_publisher
+
+  go_subscriber:
+    build: ./go_subscriber
+    tty: true
+    init: true
+    depends_on:
+      - rabbitmq
+    networks:
+      - rabbitmq_network
+    volumes:
+      - ./go_subscriber:/usr/src/go_subscriber
+
+  go_publisher:
+    build: ./go_publisher
+    tty: true
+    init: true
+    depends_on:
+      - rabbitmq
+    networks:
+      - rabbitmq_network
+    volumes:
+      - ./go_publisher:/usr/src/go_publisher
+
+networks:
+  rabbitmq_network:
+    driver: bridge
